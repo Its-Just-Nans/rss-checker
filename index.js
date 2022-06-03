@@ -8,7 +8,7 @@ let parser = new Parser();
 const FILE = path.join(__dirname, CONFIG.DATA_FILE);
 
 const job = async () => {
-    let feed = await parser.parseURL(CONFIG.URL);
+    let feed = await parser.parseURL(CONFIG.RSS_FEED);
     if (!fs.existsSync(FILE)) {
         fs.writeFileSync(FILE, "[]");
     }
@@ -16,9 +16,10 @@ const job = async () => {
     const data = JSON.parse(txt);
     const array = feed.items.reverse();
     for (const item of array) {
-        if (!data.find((oneLink) => oneLink === item.link)) {
+        const label = `${item.title}#${item.link}#${item.pubDate}`;
+        if (!data.find((oneLabel) => oneLabel === label)) {
             await webhook(item);
-            data.push(item.link);
+            data.push(label);
         }
     }
     fs.writeFileSync(FILE, JSON.stringify(data, null, 4));
